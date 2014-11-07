@@ -2106,4 +2106,8 @@ public class DistributedFileSystem extends FileSystem {
       throws IOException {
     return dfs.getInotifyEventStream(lastReadTxid);
   }
+  
+  public void setClickCount(Path src, int count) {
+	  dfs.setClickCount(src, count);
+  }
 }

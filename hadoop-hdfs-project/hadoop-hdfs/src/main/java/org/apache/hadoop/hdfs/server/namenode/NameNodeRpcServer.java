@@ -1631,4 +1631,9 @@ class NameNodeRpcServer implements NamenodeProtocols {
     namesystem.checkSuperuserPrivilege();
     nn.spanReceiverHost.removeSpanReceiver(id);
   }
+
+  @Override
+  public void setClickCount(Path src, int count) {
+	  namesystem.setClickCount(src, count);
+  }
 }

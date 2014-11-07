@@ -3223,4 +3223,15 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
     }
     return scope;
   }
+
+  public void setClickCount(Path src, int count) {
+	checkOpen();
+    try {
+      namenode.setClickCount(src, count);
+    } catch (RemoteException re) {
+      throw re.unwrapRemoteException(AccessControlException.class,
+                                     SafeModeException.class,
+                                     UnresolvedPathException.class);
+    }
+  }
 }

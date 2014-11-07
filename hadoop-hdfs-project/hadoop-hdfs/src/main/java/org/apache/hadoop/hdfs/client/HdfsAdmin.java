@@ -336,4 +336,14 @@ public class HdfsAdmin {
       throws IOException {
     dfs.setStoragePolicy(src, policyName);
   }
+  
+  /**
+   * Set the source path to the specified click count to determine data temperature
+   *
+   * @param src The source path referring to either a directory or a file.
+   * @param count The click count.
+   */
+  public void setClickCount(final Path src, final int count) {
+	  dfs.setClickCount(src, count);
+  }
 }

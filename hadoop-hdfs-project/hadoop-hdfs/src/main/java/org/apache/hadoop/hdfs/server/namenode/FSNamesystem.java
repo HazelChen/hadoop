@@ -88,6 +88,7 @@ import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_REPLICATION_DEFAULT;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_REPLICATION_KEY;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_STORAGE_POLICY_ENABLED_KEY;
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_STORAGE_POLICY_ENABLED_DEFAULT;
+import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.CRYPTO_XATTR_ENCRYPTION_ZONE;
 import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.SECURITY_XATTR_UNREADABLE_BY_SUPERUSER;
 import static org.apache.hadoop.util.Time.now;
 
@@ -9368,5 +9369,29 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
       logger.addAppender(asyncAppender);        
     }
   }
+
+  	public void setClickCount(Path src, int count) {
+  	    HdfsFileStatus resultingStat = null;
+  	    checkOperation(OperationCategory.WRITE);
+  	    final byte[][] pathComponents = FSDirectory.getPathComponentsForReservedPath(src);
+  	    writeLock();
+  	    try {
+  	      checkSuperuserPrivilege();
+  	      checkOperation(OperationCategory.WRITE);
+  	      checkNameNodeSafeMode("Cannot create encryption zone on " + src);
+  	      src = resolvePath(src, pathComponents);
+
+  	      final XAttr xAttr = XAttrHelper
+  	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, count);
+
+  	      final List<XAttr> xattrs = Lists.newArrayListWithCapacity(1);
+  	      xattrs.add(ezXAttr);
+  	      // updating the xattr will call addEncryptionZone,
+  	      // done this way to handle edit log loading
+  	      dir.unprotectedSetXAttrs(src, xattrs, EnumSet.of(XAttrSetFlag.CREATE));
+  	    } finally {
+  	      writeUnlock();
+  	    }
+	}
 }
 

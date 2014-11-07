@@ -62,7 +62,8 @@ public class XAttr {
     TRUSTED,
     SECURITY,
     SYSTEM,
-    RAW;
+    RAW,
+    STORAGE;
   }
   
   private final NameSpace ns;
