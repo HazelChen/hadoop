@@ -401,6 +401,7 @@ public class DFSAdmin extends FsShell {
     "\t[-metasave filename]\n" +
     "\t[-setStoragePolicy path policyName]\n" +
     "\t[-getStoragePolicy path]\n" +
+    "\t[-setClickCount path count]\n" +
     "\t[-triggerBlockReport [-incremental] <datanode_host:ipc_port>]\n" +
     "\t[-help [cmd]]\n";
 
@@ -621,7 +622,7 @@ public class DFSAdmin extends FsShell {
 	  }
 	  
 	  dfs.setClickCount(new Path(argv[1]), count);
-	  System.out.println("Set the count " + count + "in " + argv[1]);
+	  System.out.println("Set the count " + count + " in " + argv[1]);
 	  return 0;
   }
   

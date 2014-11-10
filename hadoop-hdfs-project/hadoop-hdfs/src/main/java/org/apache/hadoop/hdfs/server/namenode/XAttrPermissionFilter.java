@@ -115,10 +115,12 @@ public class XAttrPermissionFilter {
       } else if (xAttr.getNameSpace() == XAttr.NameSpace.RAW &&
           isSuperUser && isRawPath) {
         filteredXAttrs.add(xAttr);
+      } else if (xAttr.getNameSpace() == XAttr.NameSpace.STORAGE) {
+    	  filteredXAttrs.add(xAttr);
       } else if (XAttrHelper.getPrefixName(xAttr).
           equals(SECURITY_XATTR_UNREADABLE_BY_SUPERUSER)) {
         filteredXAttrs.add(xAttr);
-      }
+    }
     }
     
     return filteredXAttrs;
