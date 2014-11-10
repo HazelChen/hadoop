@@ -159,6 +159,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathIsNotEmptyDirectoryException;
 import org.apache.hadoop.fs.UnresolvedLinkException;
 import org.apache.hadoop.fs.XAttr;
+import org.apache.hadoop.fs.XAttrCodec;
 import org.apache.hadoop.fs.XAttrSetFlag;
 import org.apache.hadoop.fs.permission.AclEntry;
 import org.apache.hadoop.fs.permission.AclStatus;
@@ -292,6 +293,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import org.apache.hadoop.fs.XAttrCodec;
 
 /**
  * FSNamesystem is a container of both transient
@@ -9384,7 +9386,7 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   	      src = resolvePath(src, pathComponents);
 
   	      final XAttr xAttr = XAttrHelper
-  	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, BigInteger.valueOf(count).toByteArray());
+  	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, XAttrCodec.decodeValue(String.valueOf(count)));
 
   	      final List<XAttr> xattrs = Lists.newArrayListWithCapacity(1);
   	      xattrs.add(xAttr);
