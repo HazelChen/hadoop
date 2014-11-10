@@ -2114,6 +2114,6 @@ public class DistributedFileSystem extends FileSystem {
    * @param count The click count.
    */
   public void setClickCount(Path src, int count) {
-	  dfs.setClickCount(src, count);
+	  dfs.setClickCount(getUriPath(src), count);
   }
 }
