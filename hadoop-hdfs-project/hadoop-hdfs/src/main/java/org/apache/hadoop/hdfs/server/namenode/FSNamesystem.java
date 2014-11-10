@@ -90,6 +90,7 @@ import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_STORAGE_POLICY_ENABLED_KE
 import static org.apache.hadoop.hdfs.DFSConfigKeys.DFS_STORAGE_POLICY_ENABLED_DEFAULT;
 import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.CRYPTO_XATTR_ENCRYPTION_ZONE;
 import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.SECURITY_XATTR_UNREADABLE_BY_SUPERUSER;
+import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.STORAGEPOLICYENGINE_XATTR_CLICKCOUNT;
 import static org.apache.hadoop.util.Time.now;
 
 import java.io.BufferedWriter;
@@ -105,6 +106,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -9370,7 +9372,7 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
     }
   }
 
-  	public void setClickCount(Path src, int count) {
+  	public void setClickCount(String src, int count) throws IOException, UnresolvedLinkException, AccessControlException{
   	    HdfsFileStatus resultingStat = null;
   	    checkOperation(OperationCategory.WRITE);
   	    final byte[][] pathComponents = FSDirectory.getPathComponentsForReservedPath(src);
@@ -9382,10 +9384,10 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   	      src = resolvePath(src, pathComponents);
 
   	      final XAttr xAttr = XAttrHelper
-  	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, count);
+  	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, BigInteger.valueOf(count).toByteArray());
 
   	      final List<XAttr> xattrs = Lists.newArrayListWithCapacity(1);
-  	      xattrs.add(ezXAttr);
+  	      xattrs.add(xAttr);
   	      // updating the xattr will call addEncryptionZone,
   	      // done this way to handle edit log loading
   	      dir.unprotectedSetXAttrs(src, xattrs, EnumSet.of(XAttrSetFlag.CREATE));

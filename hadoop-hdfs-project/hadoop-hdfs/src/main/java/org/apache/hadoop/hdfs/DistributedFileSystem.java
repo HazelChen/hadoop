@@ -2110,10 +2110,24 @@ public class DistributedFileSystem extends FileSystem {
   /**
    * Set the source path to the specified click count to determine data temperature
    *
-   * @param src The source path referring to either a directory or a file.
+   * @param path The source path referring to either a directory or a file.
    * @param count The click count.
    */
-  public void setClickCount(Path src, int count) {
-	  dfs.setClickCount(src, count);
+  public void setClickCount(Path path, final int count) throws IOException{
+	  Path absF = fixRelativePart(path);
+	    new FileSystemLinkResolver<Void>() {
+
+	      @Override
+	      public Void doCall(final Path p) throws IOException {
+	        dfs.setClickCount(getPathName(p), count);
+	        return null;
+	      }
+
+	      @Override
+	      public Void next(final FileSystem fs, final Path p) throws IOException {
+	        fs.setClickCount(p, count);
+	        return null;
+	      }      
+	    }.resolve(this, absF);
   }
 }

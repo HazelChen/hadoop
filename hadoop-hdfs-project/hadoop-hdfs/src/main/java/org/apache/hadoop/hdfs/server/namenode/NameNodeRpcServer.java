@@ -1633,7 +1633,7 @@ class NameNodeRpcServer implements NamenodeProtocols {
   }
 
   @Override
-  public void setClickCount(Path src, int count) {
+  public void setClickCount(String src, int count) throws IOException{
 	  namesystem.setClickCount(src, count);
   }
 }
