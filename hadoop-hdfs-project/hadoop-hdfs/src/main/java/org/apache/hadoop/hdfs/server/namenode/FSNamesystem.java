@@ -9060,9 +9060,9 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
     nnConf.checkXAttrsConfigFlag();
     checkXAttrSize(xAttr);
     //TODO
-    final String xaName = XAttrHelper.getPrefixName(xattr);
+    final String xaName = XAttrHelper.getPrefixName(xAttr);
     if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.equals(xaName)) {
-  	  String clickCountWithQua = XAttrCodec.encodeValue(xattr.getValue(), XAttrCodec.TEXT);
+  	  String clickCountWithQua = XAttrCodec.encodeValue(xAttr.getValue(), XAttrCodec.TEXT);
   	  String clickCountString = clickCountWithQua.substring(1, clickCountWithQua.length() - 2);
   	  int clickCount = Integer.parseInt(clickCountString);
   	  if (clickCount > StorageEngine.HOT_THRESHOLD) {
