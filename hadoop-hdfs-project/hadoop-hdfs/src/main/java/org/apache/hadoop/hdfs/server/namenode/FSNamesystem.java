@@ -216,6 +216,7 @@ import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeManager;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStatistics;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.OutOfV1GenerationStampsException;
+import org.apache.hadoop.hdfs.server.blockmanagement.StorageEngine;
 import org.apache.hadoop.hdfs.server.common.GenerationStamp;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.NamenodeRole;
@@ -293,6 +294,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+
 import org.apache.hadoop.fs.XAttrCodec;
 
 /**
@@ -9057,6 +9059,17 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
     String src = srcArg;
     nnConf.checkXAttrsConfigFlag();
     checkXAttrSize(xAttr);
+    //TODO
+    final String xaName = XAttrHelper.getPrefixName(xattr);
+    if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.equals(xaName)) {
+  	  String clickCountWithQua = XAttrCodec.encodeValue(xattr.getValue(), XAttrCodec.TEXT);
+  	  String clickCountString = clickCountWithQua.substring(1, clickCountWithQua.length() - 2);
+  	  int clickCount = Integer.parseInt(clickCountString);
+  	  if (clickCount > StorageEngine.HOT_THRESHOLD) {
+  		  setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
+  	  }
+    }
+    
     HdfsFileStatus resultingStat = null;
     FSPermissionChecker pc = getPermissionChecker();
     XAttrPermissionFilter.checkPermissionForApi(pc, xAttr,
