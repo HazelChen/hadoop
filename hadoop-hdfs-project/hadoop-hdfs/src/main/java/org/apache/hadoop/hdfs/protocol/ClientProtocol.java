@@ -35,7 +35,6 @@ import org.apache.hadoop.fs.InvalidPathException;
 import org.apache.hadoop.fs.Options;
 import org.apache.hadoop.fs.Options.Rename;
 import org.apache.hadoop.fs.ParentNotDirectoryException;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.UnresolvedLinkException;
 import org.apache.hadoop.fs.XAttr;
 import org.apache.hadoop.fs.XAttrSetFlag;
@@ -1414,5 +1413,5 @@ public interface ClientProtocol {
   @Idempotent
   public EventsList getEditsFromTxid(long txid) throws IOException;
 
-  public void setClickCount(Path src, int count);
+  public void setClickCount(String src, int count) throws IOException;
 }

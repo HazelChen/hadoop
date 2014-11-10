@@ -92,7 +92,6 @@ import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.google.common.base.Preconditions;
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
 
 /**
  * This class provides some DFS administrative access shell commands.
@@ -616,7 +615,7 @@ public class DFSAdmin extends FsShell {
 	  
 	  try {
 		  count = Integer.parseInt(argv[2].trim());
-	  } catch (ParseException parseException) {
+	  } catch (NumberFormatException parseException) {
 		  System.out.println("Error count: " + argv[2] + ". Please input a integer.");
 		  return -1;
 	  }

@@ -3224,7 +3224,7 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
     return scope;
   }
 
-  public void setClickCount(Path src, int count) {
+  public void setClickCount(String src, int count) throws IOException{
 	checkOpen();
     try {
       namenode.setClickCount(src, count);
