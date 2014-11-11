@@ -2,8 +2,6 @@
 /fuse_workload.c
 /fuse_workload.h
 /org/
-<<<<<<< HEAD
-=======
 /TestFuseDFS$RedirectToStdoutThread.class
 /TestFuseDFS.class
 /ClassWithNoPackage.class
@@ -27,4 +25,3 @@
 /NodePage.class
 /WebServer$NMWebApp.class
 /WebServer.class
->>>>>>> branch 'DataTempreture' of https://github.com/HazelChen/hadoop.git

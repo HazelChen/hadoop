@@ -216,7 +216,6 @@ import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeManager;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStatistics;
 import org.apache.hadoop.hdfs.server.blockmanagement.DatanodeStorageInfo;
 import org.apache.hadoop.hdfs.server.blockmanagement.OutOfV1GenerationStampsException;
-import org.apache.hadoop.hdfs.server.blockmanagement.StorageEngine;
 import org.apache.hadoop.hdfs.server.common.GenerationStamp;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.NamenodeRole;
@@ -403,6 +402,8 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   public static final Log auditLog = LogFactory.getLog(
       FSNamesystem.class.getName() + ".audit");
 
+  private StorageEngine storageEngine;
+  
   static final int DEFAULT_MAX_CORRUPT_FILEBLOCKS_RETURNED = 100;
   static int BLOCK_DELETION_INCREMENT = 1000;
   private final boolean isPermissionEnabled;
@@ -782,6 +783,8 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
    */
   FSNamesystem(Configuration conf, FSImage fsImage, boolean ignoreRetryCache)
       throws IOException {
+	storageEngine = new StorageEngine(this);
+	
     provider = DFSUtil.createKeyProviderCryptoExtension(conf);
     if (provider == null) {
       LOG.info("No KeyProvider found.");
@@ -9059,19 +9062,13 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
     String src = srcArg;
     nnConf.checkXAttrsConfigFlag();
     checkXAttrSize(xAttr);
-    //TODO
+    
     final String xaName = xAttr.getName();
-    LOG.info("chenlin:the xaName is " + xaName);
     if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.endsWith(xaName)) {
-      LOG.info("chenlin:is equals");
   	  String clickCountWithQua = XAttrCodec.encodeValue(xAttr.getValue(), XAttrCodec.TEXT);
   	  String clickCountString = clickCountWithQua.substring(1, clickCountWithQua.length() - 1);
   	  int clickCount = Integer.parseInt(clickCountString);
-  	  LOG.info("chenlin:click count is:" + clickCount);
-  	  if (clickCount > StorageEngine.HOT_THRESHOLD) {
-  		  setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
-  		  LOG.info("chenlin:set storage policy");
-  	  }
+  	  storageEngine.visitCountSetNotify(src, clickCount);
     }
     
     HdfsFileStatus resultingStat = null;
@@ -9411,5 +9408,19 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   	      writeUnlock();
   	    }
 	}
+  	
+  	public int getClickCount(INode iNode) {
+  		List<XAttr> xAttrs = dir.getXAttrs(iNode, Snapshot.CURRENT_STATE_ID);
+  		for (XAttr xAttr : xAttrs) {
+			if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.endsWith(xAttr.getName())) {
+				readLock();
+				String valueWithQuate = xAttr.getValue();
+				String value = valueWithQuate.substring(1, valueWithQuate.length() - 1);
+				readUnlock();
+				return Integer.parseInt(value);
+			}
+		}
+  		return 0;
+  	}
 }
 
