@@ -65,6 +65,7 @@ public class XAttrPermissionFilter {
       throws AccessControlException {
     final boolean isSuperUser = pc.isSuperUser();
     if (xAttr.getNameSpace() == XAttr.NameSpace.USER || 
+    	xAttr.getNameSpace() == XAttr.NameSpace.STORAGE ||
         (xAttr.getNameSpace() == XAttr.NameSpace.TRUSTED && isSuperUser)) {
       return;
     }
