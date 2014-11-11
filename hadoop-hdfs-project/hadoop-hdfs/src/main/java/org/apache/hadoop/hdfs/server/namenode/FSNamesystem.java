@@ -1121,6 +1121,7 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
         getCompleteBlocksTotal());
       setBlockTotal();
       blockManager.activate(conf);
+      storageEngine.activate();
     } finally {
       writeUnlock();
     }

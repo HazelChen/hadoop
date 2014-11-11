@@ -18,14 +18,17 @@ public class StoragePolicyEngine {
 	
 	StoragePolicyEngine(FSNamesystem namesystem) {
 		this.namesystem = namesystem;
+	}
+	
+	void activate() {
 		Thread monitor = new Thread(new INodeStateMonitor());
 		monitor.start();
 	}
 	
 	void visitCountSetNotify(String src, int clickCount) throws IOException {
-//		if (clickCount > HOT_THRESHOLD) {
-//	  		  namesystem.setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
-//	  	  }
+		if (clickCount > HOT_THRESHOLD) {
+	  		  namesystem.setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
+	  	  }
 	}
 	
 	
@@ -33,18 +36,16 @@ public class StoragePolicyEngine {
 
 		@Override
 		public void run() {
-			LOG.info("chenlin:namenode not running");
 			while(namesystem.isRunning()) {
 				INode rootDir = namesystem.dir.rootDir;
 				try {
-					LOG.info("chenlin:before traval ");
 					traversalInodes(rootDir);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}	
 			
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(1000 * 60 * 15);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -53,12 +54,10 @@ public class StoragePolicyEngine {
 
 		private void traversalInodes(INode iNode) throws IOException {
 		    final boolean isDir = iNode.isDirectory();
-		    LOG.info("chenlin:path is " + iNode.getFullPathName() + " " + isDir);
 		    if (isDir) {
 		    	final INodeDirectory dir = iNode.asDirectory();  
 		    	
 				ReadOnlyList<INode> children = dir.getChildrenList(Snapshot.CURRENT_STATE_ID);
-				LOG.info("chenlin:children count " + children.size());
 				for (INode child : children) {
 					traversalInodes(child);
 				}
@@ -68,12 +67,10 @@ public class StoragePolicyEngine {
 		}
 
 		private void correctState(INode iNode) throws IOException {
-			LOG.info("chenlin:file is " + iNode.getFullPathName());
 			int clickCount = namesystem.getClickCount(iNode);
 			byte storagePolicyId = iNode.getStoragePolicyID();
 			if (clickCount > HOT_THRESHOLD && 
 					(storagePolicyId == HdfsConstants.COLD_STORAGE_POLICY_ID || storagePolicyId == BlockStoragePolicySuite.ID_UNSPECIFIED)) {
-				LOG.info("chenlin:change path is " + iNode.getFullPathName());
 				namesystem.setStoragePolicy(iNode.getFullPathName(), HdfsConstants.HOT_STORAGE_POLICY_NAME);
 			}
 		}
