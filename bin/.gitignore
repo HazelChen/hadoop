@@ -1,6 +1,3 @@
-/dao/
-/fuse_workload.c
-/fuse_workload.h
 /org/
 /TestFuseDFS$RedirectToStdoutThread.class
 /TestFuseDFS.class
@@ -25,3 +22,4 @@
 /NodePage.class
 /WebServer$NMWebApp.class
 /WebServer.class
+/dao/

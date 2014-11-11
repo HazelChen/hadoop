@@ -402,7 +402,7 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   public static final Log auditLog = LogFactory.getLog(
       FSNamesystem.class.getName() + ".audit");
 
-  private StorageEngine storageEngine;
+  private StoragePolicyEngine storageEngine;
   
   static final int DEFAULT_MAX_CORRUPT_FILEBLOCKS_RETURNED = 100;
   static int BLOCK_DELETION_INCREMENT = 1000;
@@ -783,7 +783,7 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
    */
   FSNamesystem(Configuration conf, FSImage fsImage, boolean ignoreRetryCache)
       throws IOException {
-	storageEngine = new StorageEngine(this);
+	storageEngine = new StoragePolicyEngine(this);
 	
     provider = DFSUtil.createKeyProviderCryptoExtension(conf);
     if (provider == null) {
@@ -9409,12 +9409,12 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   	    }
 	}
   	
-  	public int getClickCount(INode iNode) {
+  	public int getClickCount(INode iNode) throws IOException{
   		List<XAttr> xAttrs = dir.getXAttrs(iNode, Snapshot.CURRENT_STATE_ID);
   		for (XAttr xAttr : xAttrs) {
 			if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.endsWith(xAttr.getName())) {
 				readLock();
-				String valueWithQuate = xAttr.getValue();
+				String valueWithQuate = XAttrCodec.encodeValue(xAttr.getValue(), XAttrCodec.TEXT);
 				String value = valueWithQuate.substring(1, valueWithQuate.length() - 1);
 				readUnlock();
 				return Integer.parseInt(value);

@@ -2,26 +2,30 @@ package org.apache.hadoop.hdfs.server.namenode;
 
 import java.io.IOException;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockStoragePolicySuite;
 import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
 import org.apache.hadoop.hdfs.util.ReadOnlyList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class StorageEngine {
+public class StoragePolicyEngine {
+	public static final Log LOG = LogFactory.getLog(StoragePolicyEngine.class);
 	public static final int HOT_THRESHOLD = 10000;
 	
 	private FSNamesystem namesystem;
 	
-	StorageEngine(FSNamesystem namesystem) {
+	StoragePolicyEngine(FSNamesystem namesystem) {
 		this.namesystem = namesystem;
 		Thread monitor = new Thread(new INodeStateMonitor());
 		monitor.start();
 	}
 	
 	void visitCountSetNotify(String src, int clickCount) throws IOException {
-		if (clickCount > HOT_THRESHOLD) {
-	  		  namesystem.setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
-	  	  }
+//		if (clickCount > HOT_THRESHOLD) {
+//	  		  namesystem.setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
+//	  	  }
 	}
 	
 	
@@ -29,26 +33,32 @@ public class StorageEngine {
 
 		@Override
 		public void run() {
-			INode rootDir = namesystem.dir.rootDir;
-			try {
-				traversalInodes(rootDir);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			LOG.info("chenlin:namenode not running");
+			while(namesystem.isRunning()) {
+				INode rootDir = namesystem.dir.rootDir;
+				try {
+					LOG.info("chenlin:before traval ");
+					traversalInodes(rootDir);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}	
 			
-			try {
-				Thread.sleep(60/* * 1000 * 5*/);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
 		private void traversalInodes(INode iNode) throws IOException {
 		    final boolean isDir = iNode.isDirectory();
+		    LOG.info("chenlin:path is " + iNode.getFullPathName() + " " + isDir);
 		    if (isDir) {
 		    	final INodeDirectory dir = iNode.asDirectory();  
 		    	
 				ReadOnlyList<INode> children = dir.getChildrenList(Snapshot.CURRENT_STATE_ID);
+				LOG.info("chenlin:children count " + children.size());
 				for (INode child : children) {
 					traversalInodes(child);
 				}
@@ -58,10 +68,12 @@ public class StorageEngine {
 		}
 
 		private void correctState(INode iNode) throws IOException {
+			LOG.info("chenlin:file is " + iNode.getFullPathName());
 			int clickCount = namesystem.getClickCount(iNode);
 			byte storagePolicyId = iNode.getStoragePolicyID();
 			if (clickCount > HOT_THRESHOLD && 
 					(storagePolicyId == HdfsConstants.COLD_STORAGE_POLICY_ID || storagePolicyId == BlockStoragePolicySuite.ID_UNSPECIFIED)) {
+				LOG.info("chenlin:change path is " + iNode.getFullPathName());
 				namesystem.setStoragePolicy(iNode.getFullPathName(), HdfsConstants.HOT_STORAGE_POLICY_NAME);
 			}
 		}
