@@ -9060,13 +9060,17 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
     nnConf.checkXAttrsConfigFlag();
     checkXAttrSize(xAttr);
     //TODO
-    final String xaName = XAttrHelper.getPrefixName(xattr);
-    if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.equals(xaName)) {
-  	  String clickCountWithQua = XAttrCodec.encodeValue(xattr.getValue(), XAttrCodec.TEXT);
-  	  String clickCountString = clickCountWithQua.substring(1, clickCountWithQua.length() - 2);
+    final String xaName = xAttr.getName();
+    LOG.info("chenlin:the xaName is " + xaName);
+    if (STORAGEPOLICYENGINE_XATTR_CLICKCOUNT.endsWith(xaName)) {
+      LOG.info("chenlin:is equals");
+  	  String clickCountWithQua = XAttrCodec.encodeValue(xAttr.getValue(), XAttrCodec.TEXT);
+  	  String clickCountString = clickCountWithQua.substring(1, clickCountWithQua.length() - 1);
   	  int clickCount = Integer.parseInt(clickCountString);
+  	  LOG.info("chenlin:click count is:" + clickCount);
   	  if (clickCount > StorageEngine.HOT_THRESHOLD) {
   		  setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
+  		  LOG.info("chenlin:set storage policy");
   	  }
     }
     
@@ -9395,17 +9399,14 @@ public class FSNamesystem implements Namesystem, FSClusterStats,
   	    try {
   	      checkSuperuserPrivilege();
   	      checkOperation(OperationCategory.WRITE);
-  	      checkNameNodeSafeMode("Cannot create encryption zone on " + src);
+  	      checkNameNodeSafeMode("Cannot set visit count on " + src);
   	      src = resolvePath(src, pathComponents);
 
   	      final XAttr xAttr = XAttrHelper
   	          .buildXAttr(STORAGEPOLICYENGINE_XATTR_CLICKCOUNT, XAttrCodec.decodeValue(String.valueOf(count)));
 
-  	      final List<XAttr> xattrs = Lists.newArrayListWithCapacity(1);
-  	      xattrs.add(xAttr);
-  	      // updating the xattr will call addEncryptionZone,
-  	      // done this way to handle edit log loading
-  	      dir.unprotectedSetXAttrs(src, xattrs, EnumSet.of(XAttrSetFlag.CREATE));
+  	      setXAttr(src, xAttr, EnumSet.of(XAttrSetFlag.CREATE,
+  	            XAttrSetFlag.REPLACE));
   	    } finally {
   	      writeUnlock();
   	    }

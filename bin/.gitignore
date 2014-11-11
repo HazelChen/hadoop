@@ -1,1 +1,30 @@
+/dao/
+/fuse_workload.c
+/fuse_workload.h
 /org/
+<<<<<<< HEAD
+=======
+/TestFuseDFS$RedirectToStdoutThread.class
+/TestFuseDFS.class
+/ClassWithNoPackage.class
+/AllApplicationsPage$AllApplicationsBlock.class
+/AllApplicationsPage.class
+/AllContainersPage$AllContainersBlock.class
+/AllContainersPage.class
+/ApplicationPage$ApplicationBlock.class
+/ApplicationPage.class
+/ContainerLogsPage$ContainersLogsBlock.class
+/ContainerLogsPage.class
+/ContainerLogsUtils.class
+/ContainerPage$ContainerBlock.class
+/ContainerPage.class
+/JAXBContextResolver.class
+/NMController.class
+/NMView.class
+/NMWebServices.class
+/NavBlock.class
+/NodePage$NodeBlock.class
+/NodePage.class
+/WebServer$NMWebApp.class
+/WebServer.class
+>>>>>>> branch 'DataTempreture' of https://github.com/HazelChen/hadoop.git
