@@ -26,9 +26,7 @@ public class StoragePolicyEngine {
 	}
 	
 	void visitCountSetNotify(String src, int clickCount) throws IOException {
-		if (clickCount > HOT_THRESHOLD) {
-	  		  namesystem.setStoragePolicy(src, HdfsConstants.ALLSSD_STORAGE_POLICY_NAME);
-	  	  }
+		correctStateInt(src, clickCount);
 	}
 	
 	
@@ -52,27 +50,31 @@ public class StoragePolicyEngine {
 			}
 		}
 
-		private void traversalInodes(INode iNode) throws IOException {
-		    final boolean isDir = iNode.isDirectory();
-		    if (isDir) {
-		    	final INodeDirectory dir = iNode.asDirectory();  
-		    	
-				ReadOnlyList<INode> children = dir.getChildrenList(Snapshot.CURRENT_STATE_ID);
-				for (INode child : children) {
-					traversalInodes(child);
-				}
-			} else {
-				correctState(iNode);
+	}
+	
+	private void traversalInodes(INode iNode) throws IOException {
+		final boolean isDir = iNode.isDirectory();
+		if (isDir) {
+			final INodeDirectory dir = iNode.asDirectory();  
+			
+			ReadOnlyList<INode> children = dir.getChildrenList(Snapshot.CURRENT_STATE_ID);
+			for (INode child : children) {
+				traversalInodes(child);
 			}
+		} else {
+			correctState(iNode);
 		}
-
-		private void correctState(INode iNode) throws IOException {
-			int clickCount = namesystem.getClickCount(iNode);
-			byte storagePolicyId = iNode.getStoragePolicyID();
-			if (clickCount > HOT_THRESHOLD && 
-					(storagePolicyId == HdfsConstants.COLD_STORAGE_POLICY_ID || storagePolicyId == BlockStoragePolicySuite.ID_UNSPECIFIED)) {
-				namesystem.setStoragePolicy(iNode.getFullPathName(), HdfsConstants.HOT_STORAGE_POLICY_NAME);
-			}
+	}
+	
+	private void correctState(INode iNode) throws IOException {
+		int clickCount = namesystem.getClickCount(iNode);
+		byte storagePolicyId = iNode.getStoragePolicyID();
+		correctStateInt(iNode.getFullPathName(), clickCount);
+	}
+	
+	private void correctStateInt(String src, int clickCount) {
+		if (clickCount > HOT_THRESHOLD) {
+			namesystem.setStoragePolicy(src, HdfsConstants.HOT_STORAGE_POLICY_NAME);
 		}
 	}
 }
